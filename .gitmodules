@@ -1,0 +1,3 @@
+[submodule "YoYo"]
+	path = YoYo
+	url = https://github.com/MokaHiko/YoYo.git
