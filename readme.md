@@ -1,7 +1,7 @@
-# YoYo QuickStart
+# YoYo Networking
 
 <i>
-	YoYo QuickStart is a basic graphics template for the YoYo Renderer https://github.com/MokaHiko/YoYo.git
+	My networking library for the YoYo Renderer https://github.com/MokaHiko/YoYo.git
 </i>
 
 ### Getting Started
@@ -31,7 +31,6 @@ Run configure.bat or build manual build using cmake -S ./ -B ./build
 ### Features 
 
 <center>
-	<img src="demo_gifs/mesh_demo.gif">
-	<h4>Mesh Rendering</h4>
-	example project : https://github.com/MokaHiko/YoYo.git
+	<h4>Chat</h4>
+	<img src="ExampleImages/test.png"></img>
 </center>
