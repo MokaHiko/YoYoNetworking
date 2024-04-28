@@ -9,13 +9,13 @@ namespace yoyo
     class RenderPacket;
 }
 
-class SandboxLayer : public yoyo::Layer
+class ServerLayer : public yoyo::Layer
 {
 public:
-    LayerType(SandboxLayer)
+    LayerType(ServerLayer)
 
-    SandboxLayer(yoyo::Application* app);
-    virtual ~SandboxLayer();
+    ServerLayer(yoyo::Application* app);
+    virtual ~ServerLayer();
 
     virtual void OnAttach() override;
     virtual void OnDetatch() override;

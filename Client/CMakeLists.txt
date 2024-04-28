@@ -7,12 +7,40 @@ add_executable(${PROJECT_NAME}
 	src/GameConsole.cpp
 	src/GameConsole.h
 
-	src/Sandbox.h
-	src/Sandbox.cpp
-)
+	src/Client.h
+	src/Client.cpp
 
-# if(CMAKE_BUILD_TYPE AND CMAKE_BUILD_TYPE STREQUAL "Debug" OR TRUE)
-# endif()
+	src/Registry.cpp
+	src/Registry.h
+	src/RegistryEvents.cpp
+	src/RegistryEvents.h
+
+	src/ActorTypes.h
+
+	src/Actor.h
+	src/Actor.cpp
+
+	src/SceneGraph/SceneGraph.h
+	src/SceneGraph/SceneGraph.cpp
+	src/SceneGraph/Scene.h
+	src/SceneGraph/Scene.cpp
+
+
+	src/Scripting/ScriptableActor.h
+	src/Scripting/ScriptableActor.cpp
+
+	src/Card/Unit.h
+	src/Card/Unit.cpp
+
+	src/Card/Card.cpp
+	src/Card/Card.h
+
+	src/PlayerController.h
+	src/PlayerController.cpp
+
+	src/Renderable/Renderable.h
+	src/Renderable/Renderable.cpp
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC src/ ${CMAKE_SOURCE_DIR}/Networking/include)
 target_link_libraries(${PROJECT_NAME} PUBLIC 
@@ -20,17 +48,15 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	Networking
 )
 
+add_custom_target(copy_assets ALL
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+	${PROJECT_SOURCE_DIR}/assets
+	${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets
+	COMMENT "Copying resources into bin and binary folder."
+	COMMAND cmd /c ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/shaders/compile_shaders.bat
+	COMMENT "Compiling shaders.")
 
-
-# add_custom_target(copy_assets ALL
-# 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-# 	${PROJECT_SOURCE_DIR}/assets
-# 	${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets
-# 	COMMENT "Copying resources into bin and binary folder."
-# 	COMMAND cmd /c ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/shaders/compile_shaders.bat
-# 	COMMENT "Compiling shaders.")
-
-# add_dependencies(${PROJECT_NAME} copy_assets)
+#add_dependencies(${PROJECT_NAME} copy_assets)
 
 set_target_properties(
 	${PROJECT_NAME} PROPERTIES

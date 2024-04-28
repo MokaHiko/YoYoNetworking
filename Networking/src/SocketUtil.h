@@ -3,7 +3,11 @@
 #include "UDPSocket.h"
 #include "TCPSocket.h"
 
-#define NO_ERROR 0
+enum class EndianType
+{
+    LittleEndian,
+    BigEndian,
+};
 
 enum class SocketAddressFamily
 {
@@ -17,6 +21,17 @@ public:
     static int GetLastError();
 
     static int StartUp();
+
+    inline const static EndianType StreamEndianType() {return EndianType::LittleEndian;}
+
+    inline const static EndianType PlatformEndianType() 
+    {
+        #if defined(_WIN32) || defined(__APPLE__)
+        return EndianType::LittleEndian;
+        #endif
+
+        return EndianType::BigEndian;
+    };
 
     // Creates a udp socket
     static UDPSocketPtr CreateUDPSocket(SocketAddressFamily in_family);

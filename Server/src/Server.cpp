@@ -1,4 +1,4 @@
-#include "Sandbox.h"
+#include "Server.h"
 
 #include <Yoyo.h>
 
@@ -27,10 +27,10 @@
 // Move to network layer
 #include <FumblyNet.h>
 
-SandboxLayer::SandboxLayer(yoyo::Application* app)
+ServerLayer::ServerLayer(yoyo::Application* app)
     :m_app(app), m_renderer_layer(nullptr) {}
 
-SandboxLayer::~SandboxLayer() {}
+ServerLayer::~ServerLayer() {}
 
 
 #define SERVER_ADDRESS "127.0.0.1:6000"
@@ -40,7 +40,7 @@ static SocketAddressPtr server_address;
 static std::vector<TCPSocketPtr> read_block_sockets;
 static std::vector<TCPSocketPtr> readable_sockets;
 
-void SandboxLayer::OnAttach() 
+void ServerLayer::OnAttach() 
 {
     // TODO: Networking layer
     if(SocketUtil::StartUp() != 0)
@@ -94,7 +94,7 @@ void RunServer()
     long interval = 1 / 1000.0f; 
 
     // Check if any messages are readable
-    if(SocketUtil::Select(&read_block_sockets, &readable_sockets, nullptr, nullptr, nullptr, nullptr))
+    if(SocketUtil::Select(interval, &read_block_sockets, &readable_sockets, nullptr, nullptr, nullptr, nullptr))
     {
         for(const TCPSocketPtr& socket : readable_sockets)
         {
@@ -124,34 +124,12 @@ void RunServer()
     }
 }
 
-void SandboxLayer::OnDetatch() {}
+void ServerLayer::OnDetatch() {}
 
-void SandboxLayer::OnEnable()
+void ServerLayer::OnEnable()
 {
     YASSERT(m_app != nullptr, "Invalid application handle!");
     m_renderer_layer = m_app->FindLayer<yoyo::RendererLayer>();
-
-    // Load assets
-    Ref<yoyo::Shader> default_lit = yoyo::ResourceManager::Instance().Load<yoyo::Shader>("lit_shader");
-    Ref<yoyo::Shader> default_lit_instanced = yoyo::ResourceManager::Instance().Load<yoyo::Shader>("lit_instanced_shader");
-    Ref<yoyo::Shader> skinned_lit = yoyo::ResourceManager::Instance().Load<yoyo::Shader>("skinned_lit_shader");
-
-    Ref<yoyo::Material> default_material = yoyo::Material::Create(default_lit, "default_material");
-    Ref<yoyo::Texture> default_texture = yoyo::ResourceManager::Instance().Load<yoyo::Texture>("assets/textures/prototype_512x512_white.yo");
-    default_material->SetTexture(yoyo::MaterialTextureType::MainTexture, default_texture);
-    default_material->SetVec4("diffuse_color", yoyo::Vec4{ 1.0f, 1.0f, 1.0f, 1.0f });
-    default_material->SetVec4("specular_color", yoyo::Vec4{ 1.0, 1.0f, 1.0f, 1.0f });
-    default_material->SetColor(yoyo::Vec4{ 1.0f, 1.0f, 1.0f, 1.0f });
-
-    Ref<yoyo::Material> default_instanced_material = yoyo::Material::Create(default_lit_instanced, "default_instanced_material");
-    Ref<yoyo::Texture> default_instanced_texture = yoyo::ResourceManager::Instance().Load<yoyo::Texture>("assets/textures/prototype_512x512_white.yo");
-    default_instanced_material->SetTexture(yoyo::MaterialTextureType::MainTexture, default_instanced_texture);
-    default_instanced_material->SetVec4("diffuse_color", yoyo::Vec4{ 1.0f, 1.0f, 1.0f, 1.0f });
-    default_instanced_material->SetVec4("specular_color", yoyo::Vec4{ 1.0f, 1.0f, 1.0f, 1.0f });
-    default_instanced_material->SetColor(yoyo::Vec4{1.0f, 1.0f, 1.0f, 1.0f});
-
-    yoyo::ResourceManager::Instance().Load<yoyo::Model>("assets/models/plane.yo");
-    Ref<yoyo::Model> cube_model = yoyo::ResourceManager::Instance().Load<yoyo::Model>("assets/models/cube.yo");
 
 	//Camera
 	Ref<yoyo::Camera> camera = CreateRef<yoyo::Camera>();
@@ -163,51 +141,44 @@ void SandboxLayer::OnEnable()
 	dir_light->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	dir_light->direction = yoyo::Vec4{ 1.0f, 1.0f, 1.0f, 1.0f } *-1.0f;
 
-    // Scene objects
-	Ref<yoyo::MeshPassObject> cube = CreateRef<yoyo::MeshPassObject>();
-	cube->mesh = yoyo::ResourceManager::Instance().Load<yoyo::StaticMesh>("Cube");
-	cube->material = yoyo::ResourceManager::Instance().Load<yoyo::Material>("default_material");
-	cube->model_matrix = {};
-
     // Send render packet to renderer 
     yoyo::RenderPacket* rp = YNEW yoyo::RenderPacket();
 	rp->new_camera = camera;
 	rp->new_dir_lights.push_back(dir_light);
-	rp->new_objects.push_back(cube);
 
     SendRenderPacket(rp);
 }
 
-void SandboxLayer::OnDisable()
+void ServerLayer::OnDisable()
 {
     SocketUtil::Shutdown();
 
     m_renderer_layer = nullptr;
 };
 
-void SandboxLayer::OnUpdate(float dt)
+void ServerLayer::OnUpdate(float dt)
 {
     RunServer();
 }
 
-void SandboxLayer::SendRenderPacket(yoyo::RenderPacket* rp)
+void ServerLayer::SendRenderPacket(yoyo::RenderPacket* rp)
 {
 	m_renderer_layer->SendRenderPacket(rp);
 }
 
-class Sandbox : public yoyo::Application
+class Server : public yoyo::Application
 {
 public:
-    Sandbox()
+    Server()
         : yoyo::Application({ "Server", 0, 0, 720, 480})
     {
-        PushLayer(YNEW SandboxLayer(this));
+        PushLayer(YNEW ServerLayer(this));
     }
 
-    ~Sandbox(){}
+    ~Server(){}
 };
 
 yoyo::Application* CreateApplication()
 {
-    return YNEW Sandbox;
+    return YNEW Server;
 };
